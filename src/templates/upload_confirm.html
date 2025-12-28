@@ -1,0 +1,356 @@
+{% extends "layout.html" %}
+{% block body %}
+  <style>
+    .confirm-container {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 0;
+      border-radius: 15px;
+      background: white;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 0.9rem;
+      overflow: hidden;
+    }
+
+    .confirm-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .confirm-body {
+      padding: 20px 24px 30px 24px;
+    }
+
+    .confirm-body p {
+      text-align: center;
+      font-weight: 500;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    /* 智能识别结果区域 */
+    .smart-result {
+      background: linear-gradient(135deg, #f8f9fc 0%, #e8eaf6 100%);
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .smart-result h4 {
+      margin: 0 0 12px 0;
+      color: #667eea;
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      gap: 8px;
+    }
+
+    .result-label {
+      font-weight: 600;
+      color: #2c3e50;
+      min-width: 140px;
+    }
+
+    .result-value {
+      color: #333;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    /* 置信度条 */
+    .confidence-bar {
+      height: 18px;
+      background-color: #e0e0e0;
+      border-radius: 9px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff9800, #4CAF50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      transition: width 0.5s ease;
+    }
+
+    /* 相似度对比 */
+    .similarity-scores {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .similarity-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .score-item {
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+      padding: 6px 10px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    .score-item.best-match {
+      background-color: #e8f5e9;
+      border: 1px solid #4CAF50;
+    }
+
+    .score-name {
+      min-width: 100px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .score-bar {
+      flex: 1;
+      height: 14px;
+      background-color: #e0e0e0;
+      border-radius: 7px;
+      overflow: hidden;
+      margin: 0 8px;
+    }
+
+    .score-fill {
+      height: 100%;
+      background-color: #2196F3;
+      transition: width 0.5s ease;
+    }
+
+    .score-item.best-match .score-fill {
+      background-color: #4CAF50;
+    }
+
+    .score-value {
+      min-width: 50px;
+      text-align: right;
+      font-weight: bold;
+      color: #333;
+      font-size: 0.75rem;
+    }
+
+    /* 警告框 */
+    .warning-box {
+      background-color: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #856404;
+      font-size: 0.85rem;
+    }
+
+    .warning-box.low-confidence {
+      background-color: #ffebee;
+      border-color: #f44336;
+      color: #c62828;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    td {
+      padding: 8px 4px;
+      vertical-align: middle;
+    }
+
+    label {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.85rem;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.4);
+    }
+
+    select option {
+      padding: 8px;
+    }
+
+    .actions {
+      text-align: center;
+    }
+
+    button[type="submit"] {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      margin-right: 12px;
+    }
+
+    button[type="submit"]:hover {
+      background: linear-gradient(135deg, #5a67d8, #6b46c1);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    a.cancel-link {
+      font-size: 0.85rem;
+      color: #888;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a.cancel-link:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 620px) {
+      .confirm-body {
+        padding: 16px;
+      }
+
+      button[type="submit"] {
+        display: block;
+        width: 100%;
+        margin: 0 0 12px 0;
+      }
+
+      a.cancel-link {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .result-label {
+        margin-bottom: 4px;
+      }
+    }
+  </style>
+
+  <div class="confirm-container">
+    <div class="confirm-header">Confirm Firmware Upload</div>
+    <div class="confirm-body">
+      <p>Selected file: <strong>{{ original_filename }}</strong></p>
+
+      {% if firmware_info and firmware_info.top_scores %}
+      <div class="smart-result">
+        <h4>🔍 Firmware Similarity Analysis</h4>
+        <div class="similarity-scores">
+          <div class="similarity-title">Top 5 Similar Projects:</div>
+          {% for project, score in firmware_info.top_scores.items() %}
+          <div class="score-item {% if project == guessed_name %}best-match{% endif %}">
+            <span class="score-name">{{ project }}</span>
+            <div class="score-bar">
+              <div class="score-fill" style="width: {{ score }}%;"></div>
+            </div>
+            <span class="score-value">{{ "%.1f"|format(score) }}%</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      {% if firmware_info.confidence and firmware_info.confidence < 30 %}
+      <div class="warning-box low-confidence">
+        ⚠️ <strong>Low Confidence Warning:</strong> All projects show low similarity (highest {{ "%.1f"|format(firmware_info.confidence) }}%). Please carefully verify the selected project is correct.
+      </div>
+      {% endif %}
+      
+      {% else %}
+      <div class="warning-box">
+        ⚠️ Unable to compare with existing firmware. Please manually select project and enter version.
+      </div>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('upload_confirm') }}">
+        <input type="hidden" name="tmp_filename" value="{{ tmp_filename }}">
+
+        <table>
+          <tr>
+            <td><label for="project">Project:</label></td>
+            <td>
+              <select id="project" name="project" required>
+                <option value="">-- Select --</option>
+                {% for project_key in projects.keys() %}
+                <option value="{{project_key }}" 
+                    {% if guessed_name and project_key == guessed_name %}selected{% endif %}>
+                  {{ project_key }}
+                  {% if guessed_name and project_key == guessed_name %}
+                  ⭐
+                  {% endif %}
+                  {% if firmware_info.all_scores and project_key in firmware_info.all_scores %}
+                  ({{ "%.1f"|format(firmware_info.all_scores[project_key]) }}%)
+                  {% endif %}
+                </option>
+                {% endfor %}
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td><label for="version">Version:</label></td>
+            <td><input id="version" type="text" name="version" value="{{ suggested_version }}" required 
+                       pattern="[0-9]+\.[0-9]+" 
+                       title="Format: xx.x (e.g., 1.0, 2.5)"></td>
+          </tr>
+        </table>
+
+        <div class="actions">
+          <button type="submit">Confirm Upload</button>
+          <a href="{{ url_for('upload') }}" class="cancel-link">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

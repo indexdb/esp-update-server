@@ -1,0 +1,30 @@
+<!doctype html>
+<head>
+  <title>ESP Update Server</title>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class=page>
+<h1>
+  ESP Update Server
+  <span class="version">ver 1.0</span>
+</h1>
+
+    <div class=metanav>
+      <a href="{{ url_for('index') }}">Status</a>
+      <a href="{{ url_for('manage') }}">Manage</a>
+      <a href="{{ url_for('whitelist') }}">Whitelist</a>
+      <a href="{{ url_for('upload') }}">Upload</a>
+      <a href="{{ url_for('devices') }}">Devices</a>
+	  <a href="{{ url_for('logs') }}">Logs</a>
+	  <a href="{{ url_for('change_password') }}">Password Settings</a>
+    </div>
+    {% for message in get_flashed_messages() %}
+      <div class=flash>{{ message }}</div>
+    {% endfor %}
+    {% block body %}{% endblock %}
+    <div class=metanav>
+      <a href="https://github.com/indexdb">IndexDB</a>
+    </div>    
+  </div>
+</body>

@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+{% block head %}
+  {{ super() }}
+  <meta http-equiv="refresh" content="10">
+  <style>
+    .log-toolbar {
+      margin-bottom: 10px;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .log-toolbar button {
+      display: inline-block;
+      padding: 6px 12px;
+      margin-left: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    .log-toolbar form {
+      display: inline-block;
+      margin: 0;
+      padding: 0;
+    }
+    .log-toolbar span {
+      font-family: monospace;
+      font-weight: bold;
+    }
+    
+    /* 日志容器样式 */
+    .log-container {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      background-color: #f8f9fa;
+      color: #212529;
+      padding: 15px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid #dee2e6;
+    }
+  </style>
+{% endblock %}
+{% block body %}
+<div class="log-toolbar">
+  ⏳ <span id="countdown">10</span> seconds.
+  <form action="{{ url_for('clear_logs') }}" method="post">
+    <button type="submit">🧹 Clear Log</button>
+    <button type="button" onclick="location.reload()">🔄 Refresh</button>
+  </form>
+</div>
+<pre class="log-container" id="log-content">{{ content | safe }}</pre>
+<script>
+  let seconds = 10;
+  const countdown = document.getElementById('countdown');
+  const interval = setInterval(() => {
+    seconds--;
+    countdown.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(interval);
+      location.reload();
+    }
+  }, 1000);
+
+  // 日志语法高亮函数
+  function highlightLogs() {
+    const logContainer = document.getElementById('log-content');
+    const originalContent = document.getElementById('log-content').innerHTML;
+    // 应用语法高亮
+    let highlightedContent = originalContent
+      // 时间戳 - 柔和的蓝灰色
+      .replace(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/g, 
+        '<span style="color: #fd7e14; font-weight: bold;">$1</span>')
+      // 分隔线 - 简约的灰色背景
+      .replace(/(=+\s+[A-F0-9]+\s+=+)/g, 
+        '<span style="color: #495057; background-color: #e9ecef; padding: 1px 6px; border-radius: 2px; font-weight: normal;">$1</span>')
+      // MAC地址 - 深青色
+      .replace(/([a-f0-9]{12})/gi, 
+        '<span style="color: #17a2b8; font-weight: bold;">$1</span>')
+      // INFO日志 - 深蓝色
+      .replace(/(INFO:)/g, 
+        '<span style="color: #007bff; font-weight: bold;">$1</span>')
+      // URL - 深紫色
+      .replace(/(http:\/\/[^\s]+)/g, 
+        '<span style="color: #6f42c1;">$1</span>')
+      // 参数 - 深橙色
+      .replace(/(__\w+:)/g, 
+        '<span style="color: #fd7e14; font-weight: bold;">$1</span>')
+      // 设备信息 - 深红色
+      .replace(/(Dev:\s*\w+)/g, 
+        '<span style="color: #dc3545; font-weight: bold;">$1</span>')
+      // 版本信息 - 深绿色
+      .replace(/(Ver:\s*v[\d.]+)/g, 
+        '<span style="color: #28a745; font-weight: bold;">$1</span>')
+      // 状态信息 - 深橙色
+      .replace(/(No update needed\.)/g, 
+        '<span style="color: #fd7e14; font-weight: bold;">$1</span>');
+    
+    logContainer.innerHTML = highlightedContent;
+  }
+
+  // 页面加载完成后执行高亮
+  document.addEventListener('DOMContentLoaded', function() {
+    highlightLogs();
+  });
+</script>
+{% endblock %}

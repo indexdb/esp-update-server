@@ -1,0 +1,278 @@
+{% extends "layout.html" %}
+{% block body %}
+<style>
+.whitelist-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 24px;
+  border-radius: 15px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.9rem;
+}
+
+.whitelist-container h2 {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 20px;
+  margin: 0 -24px 24px -24px;
+  border-radius: 12px 12px 0 0;
+  font-size: 1.3rem;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.section-card {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr;
+  gap: 10px;
+  align-items: end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #5a6c7d;
+  margin-bottom: 5px;
+  font-size: 0.85rem;
+}
+
+.form-select,
+.form-input {
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-add {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: white;
+}
+
+.btn-add:hover {
+  background: linear-gradient(135deg, #229954, #27ae60);
+  transform: translateY(-2px);
+}
+
+.project-section {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #e1e8ed;
+}
+
+.project-header {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+}
+
+.whitelist-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.whitelist-item {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.whitelist-item:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+}
+
+.mac-display {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.85rem;
+}
+
+.btn-remove {
+  background: #dc3545;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+  background: #c82333;
+}
+
+.empty-message {
+  text-align: center;
+  color: #95a5a6;
+  font-style: italic;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.helper-text {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .whitelist-items {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<div class="whitelist-container">
+  <h2>Whitelist Management</h2>
+
+  <div class="section-card">
+    <div class="section-title">Add Device to Whitelist</div>
+    <form method="post">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Project:</label>
+          <select name="device" class="form-select" required>
+            <option value="--">-- Select Project --</option>
+            {% if projects %}
+              {% for project in projects.keys() %}
+                <option value="{{ project }}">{{ project.upper() }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">MAC Address:</label>
+          <input type="text" 
+                 name="macaddr" 
+                 class="form-input" 
+                 placeholder="e.g., AA:BB:CC:DD:EE:FF"
+                 required>
+          <p class="helper-text">Enter MAC address with or without colons</p>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" style="opacity: 0;">Action</label>
+          <button type="submit" name="action" value="Add" class="btn btn-add">Add</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if projects %}
+    {% for project, project_info in projects.items() %}
+      {% if project_info['whitelist'] %}
+        <div class="project-section">
+          <div class="project-header">
+            {{ project }}
+            <span style="float: right; font-size: 0.8rem; opacity: 0.9;">
+              {{ project_info['whitelist']|length }} devices
+            </span>
+          </div>
+          
+          <div class="whitelist-items">
+            {% for mac in project_info['whitelist'] %}
+              <div class="whitelist-item">
+                <span class="mac-display">{{ format_mac(mac.upper()) }}</span>
+                <form method="post" style="display: inline; margin: 0;">
+                  <input type="hidden" name="device" value="{{ project }}">
+                  <input type="hidden" name="macaddr" value="{{ mac }}">
+                  <button type="submit" 
+                          name="action" 
+                          value="Remove" 
+                          class="btn-remove"
+                          onclick="return confirm('Remove {{ format_mac(mac.upper()) }} from whitelist?');">
+                    Remove
+                  </button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+    
+    {% set has_whitelist = namespace(found=false) %}
+    {% for project_info in projects.values() %}
+      {% if project_info['whitelist'] %}
+        {% set has_whitelist.found = true %}
+      {% endif %}
+    {% endfor %}
+    
+    {% if not has_whitelist.found %}
+      <div class="empty-message">
+        📝 No whitelisted devices yet. Add devices using the form above.
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="empty-message">
+      ⚠️ No projects available. Please create a project first.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
